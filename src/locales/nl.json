@@ -111,7 +111,12 @@
     },
     "selfHostedLLM": {
       "label": "Gebruik zelf-gehoste LLM's",
-      "description": "Maakt het mogelijk om een pad te configureren naar een llm-frog manager-instantie die lokale LLM-opslag beheert"
+      "description": "Maakt het mogelijk om een pad te configureren naar een llm-frog manager-instantie die de lokale LLM-opslag beheert",
+      "activated": {
+        "title": "Configureer pad naar llmfrog",
+        "label": "LLMFrog URL-pad",
+        "helper": "Het pad naar jouw llmfrog voor het uitvoeren van verzoeken"
+      }
     },
     "api": {
       "title": "API Configuratie",
