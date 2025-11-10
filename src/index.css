@@ -1,0 +1,67 @@
+/* index.css - Global styles */
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  width: 100%;
+  height: 100vh;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove default Material-UI margins */
+.MuiContainer-root {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Ensure full height for main containers */
+.MuiPaper-root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fix for MUI tabs */
+.MuiTabs-root {
+  min-height: 48px;
+}
+
+/* Custom scrollbar for all browsers */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+/* Utility classes */
+.h-full {
+  height: 100%;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}

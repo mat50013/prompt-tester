@@ -1,0 +1,132 @@
+{
+  "app": {
+    "title": "Prompt Tester",
+    "subtitle": "Test en beoordeel prompts over meerdere LLM's"
+  },
+  "navigation": {
+    "editor": "Editor",
+    "models": "Modellen",
+    "results": "Resultaten",
+    "settings": "Instellingen"
+  },
+  "testEditor": {
+    "title": "Testcase Bewerken",
+    "newTestCase": "Nieuwe Testcase",
+    "deleteConfirm": "Weet u zeker dat u deze testcase wilt verwijderen?",
+    "fields": {
+      "name": "Testnaam",
+      "systemPrompt": "Systeemprompt",
+      "userPrompt": "Gebruikersprompt",
+      "sourceText": "Brontekst (Optioneel)",
+      "expectedResult": "Verwacht Resultaat (Optioneel)"
+    },
+    "actions": {
+      "save": "Opslaan",
+      "run": "Test Uitvoeren",
+      "delete": "Verwijderen"
+    },
+    "messages": {
+      "saved": "Testcase succesvol opgeslagen",
+      "deleted": "Testcase verwijderd",
+      "selectModel": "Selecteer ten minste één model voordat u de test uitvoert"
+    }
+  },
+  "modelSelector": {
+    "title": "Selecteer Modellen",
+    "subtitle": "Kies een of meer modellen om uw prompts mee te testen",
+    "search": "Zoek modellen...",
+    "selectAll": "Alles Selecteren",
+    "clearAll": "Alles Wissen",
+    "selected": "{{count}} geselecteerd",
+    "pricing": "€{{prompt}}/1K in, €{{completion}}/1K uit",
+    "context": "Context: {{length}} tokens",
+    "noSelection": "Selecteer ten minste één model om tests uit te voeren"
+  },
+  "results": {
+    "title": "Resultaten Dashboard",
+    "export": "Exporteren",
+    "filter": "Filter Resultaten",
+    "status": {
+      "pending": "Niet uitgevoerd",
+      "running": "Bezig",
+      "completed": "Voltooid",
+      "failed": "Mislukt"
+    },
+    "actions": {
+      "view": "Bekijk Resultaat",
+      "grade": "Beoordeel Resultaat"
+    },
+    "similarity": "Overeenkomst: {{percent}}%",
+    "score": "Score: {{score}}"
+  },
+  "grading": {
+    "title": "Beoordeel Resultaat",
+    "methods": {
+      "manual": "Handmatige Beoordeling",
+      "automatic": "Automatische Beoordeling (GPT-4)"
+    },
+    "score": "Score: {{score}}/100",
+    "comments": "Opmerkingen",
+    "rubric": "Beoordelingsrubric",
+    "rubricHelper": "Definieer de criteria voor automatische beoordeling",
+    "autoInfo": "Het antwoord wordt samen met deze rubric naar GPT-4 gestuurd voor evaluatie.",
+    "submit": "Beoordeling Indienen",
+    "messages": {
+      "success": "Resultaat succesvol beoordeeld",
+      "failed": "Beoordeling mislukt: {{error}}"
+    }
+  },
+  "export": {
+    "title": "Resultaten Exporteren",
+    "formats": {
+      "excel": "Excel (.xlsx) - Het beste voor analyse en rapportage",
+      "csv": "CSV (.csv) - Eenvoudig tabelformaat",
+      "json": "JSON (.json) - Volledige data-export"
+    },
+    "include": "Opnemen in Export:",
+    "options": {
+      "testCases": "Testcases ({{count}})",
+      "results": "Testresultaten ({{count}})",
+      "grades": "Beoordelingen ({{count}})",
+      "metadata": "Export Metadata"
+    },
+    "info": "Excel-export zal meerdere bladen maken: Testcases, Resultaten, Beoordelingen en een Samenvatting met alle scores.",
+    "noData": "Geen data om te exporteren. Maak en voer eerst enkele tests uit."
+  },
+  "settings": {
+    "title": "Instellingen",
+    "theme": {
+      "label": "Thema",
+      "light": "Licht",
+      "dark": "Donker"
+    },
+    "language": {
+      "label": "Taal",
+      "en": "English",
+      "nl": "Nederlands"
+    },
+    "roundTrip": {
+      "label": "Schakel Round-Trip Vertaling in",
+      "description": "Vertaal prompts van Nederlands naar Engels, verwerk, en vertaal terug"
+    },
+    "selfHostedLLM": {
+      "label": "Gebruik zelf-gehoste LLM's",
+      "description": "Maakt het mogelijk om een pad te configureren naar een llm-frog manager-instantie die lokale LLM-opslag beheert"
+    },
+    "api": {
+      "title": "API Configuratie",
+      "key": "OpenRouter API Sleutel",
+      "keyHelper": "Uw OpenRouter API-sleutel voor toegang tot modellen"
+    }
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Fout",
+    "cancel": "Annuleren",
+    "close": "Sluiten",
+    "save": "Opslaan",
+    "delete": "Verwijderen",
+    "export": "Exporteren",
+    "import": "Importeren"
+  }
+}
