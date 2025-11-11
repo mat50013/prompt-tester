@@ -3,7 +3,7 @@ import { db } from './databaseService';
 import store from "../store/index.js";
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const API_URL = import.meta.env.VITE_OPENROUTER_API_URL || 'https://openrouter.ai/api/v1';
+const API_URL = import.meta.env.VITE_OPENROUTER_API_URL || 'https://openrouter.ai/api/';
 
 class OpenRouterService {
   constructor() {
@@ -21,7 +21,7 @@ class OpenRouterService {
     const llmFrogPath = await db.getSetting('llmFrogPath');
 
     const isDevelopment = import.meta.env.VITE_DEV;
-    const baseURL = isDevelopment ? '/api/local/v1' : llmFrogPath;
+    const baseURL = isDevelopment ? '/api/local/' : llmFrogPath;
 
     if (enabledSelfHosted && llmFrogPath) {
       return {
@@ -51,44 +51,59 @@ class OpenRouterService {
     return this.client;
   }
 
-  async getAvailableModels(searchQuery = 'gguf', limit = 500) {
+  async getAvailableModels(searchQuery = 'gguf', limit = 100) {
     try {
       const config = await this.getClientConfig();
       const client = await this.getClient();
 
-      console.log(config);
       if (config.isLocal) {
-        const response = await client.get('/models/search', {
+        const response = await client.get('/api/models/search', {
           params: {
             q: searchQuery,
+            limit: limit,
           },
         });
 
-        if (response.data.models && Array.isArray(response.data.models)) {
-          return response.data.models.map(model => ({
-            id: model.id,
-            name: model.name,
-            description: `${model.quantization} - ${model.repo}`,
-            contextLength: 0,
-            pricing: { prompt: '0', completion: '0' },
-            quantization: model.quantization,
-            repo: model.repo,
-            file: model.file,
-            downloads: model.downloads,
-            likes: model.likes,
-            tags: model.tags,
-          }));
+        const responseData = response.data;
+
+        if (responseData.models && Array.isArray(responseData.models)) {
+          const uniqueModels = new Map();
+
+          responseData.models.forEach(model => {
+            if (model.ggufFiles && Array.isArray(model.ggufFiles)) {
+              model.ggufFiles.forEach(ggufFile => {
+                const modelId = ggufFile.suggestedModelID;
+
+                if (modelId && !uniqueModels.has(modelId)) {
+                  uniqueModels.set(modelId, {
+                    id: modelId,
+                    name: modelId.split(':')[1] ?
+                        `${model.author}/${modelId.split('/')[1]}` :
+                        modelId,
+                    description: `${ggufFile.quantization} - ${model.author} - ${model.downloads || 0} downloads`,
+                    contextLength: -1,
+                    pricing: { prompt: '0', completion: '0' },
+                    quantization: ggufFile.quantization,
+                    author: model.author,
+                    downloads: model.downloads || model.downloadCount || 0,
+                    likes: model.likes || 0,
+                    tags: model.tags || [],
+                    isSplit: ggufFile.isSplit || false,
+                    filename: ggufFile.filename,
+                  });
+                }
+              });
+            }
+          });
+
+          return Array.from(uniqueModels.values());
         } else {
-          return [{
-            id: 'local-model',
-            name: 'Local Model',
-            description: 'Self-hosted LLM',
-            contextLength: 4096,
-            pricing: { prompt: '0', completion: '0' },
-          }];
+          console.warn('Unexpected response structure:', responseData);
+          return [];
         }
       } else {
-        const response = await client.get('/models');
+        // OpenRouter API
+        const response = await client.get('/v1/models');
         return response.data.data.map(model => ({
           id: model.id,
           name: model.name || model.id,
@@ -99,6 +114,7 @@ class OpenRouterService {
       }
     } catch (error) {
       console.error('Error fetching models:', error);
+      console.error('Error details:', error.response?.data);
       throw new Error('Failed to fetch available models');
     }
   }
@@ -110,7 +126,7 @@ class OpenRouterService {
       const client = await this.getClient();
       const messages = this.buildMessages(testCase);
 
-      const response = await client.post('/chat/completions', {
+      const response = await client.post('/v1/chat/completions', {
         model: modelId,
         messages,
         temperature: 0.7,
@@ -146,7 +162,7 @@ class OpenRouterService {
       const client = await this.getClient();
       const messages = this.buildMessages(translatedTestCase);
 
-      const response = await client.post('/chat/completions', {
+      const response = await client.post('/v1/chat/completions', {
         model: modelId,
         messages,
         temperature: 0.7,
@@ -200,7 +216,7 @@ Feedback: [your detailed feedback]`;
 
       const client = await this.getClient();
 
-      const response = await client.post('/chat/completions', {
+      const response = await client.post('/v1/chat/completions', {
         model: autoGradingModel,
         messages: [
           { role: 'user', content: gradingPrompt }
@@ -242,7 +258,7 @@ Provide only the English translation without any explanation.`;
 
       const client = await this.getClient();
 
-      const response = await client.post('/chat/completions', {
+      const response = await client.post('/v1/chat/completions', {
         model: modelId,
         messages: [
           { role: 'user', content: translationPrompt }
@@ -280,7 +296,7 @@ Provide only the Dutch translation without any explanation.`;
 
       const client = await this.getClient();
 
-      const response = await client.post('/chat/completions', {
+      const response = await client.post('/v1/chat/completions', {
         model: modelId,
         messages: [
           { role: 'user', content: translationPrompt }
