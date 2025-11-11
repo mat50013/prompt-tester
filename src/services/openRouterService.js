@@ -176,7 +176,7 @@ class OpenRouterService {
     }
   }
 
-  async autoGrade({ testCase, result }) {
+  async autoGrade({ testCase, result, autoGradingModel = 'openai/gpt-4.1' }) {
     try {
       const gradingPrompt = `
 You are an expert evaluator. You will be given a test case with a prompt and the model's response. Evaluate the quality of the response.
@@ -201,7 +201,7 @@ Feedback: [your detailed feedback]`;
       const client = await this.getClient();
 
       const response = await client.post('/chat/completions', {
-        model: 'openai/gpt-4.1',
+        model: autoGradingModel,
         messages: [
           { role: 'user', content: gradingPrompt }
         ],

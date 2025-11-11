@@ -207,7 +207,7 @@ const ResultViewer = ({ open, onClose, result }) => {
                     <strong>Score:</strong> {grade.score}/100
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Method:</strong> {grade.method === 'automatic' ? 'Automatic (GPT-4.1)' : 'Manual'}
+                    <strong>Method:</strong> {grade.method === 'automatic' ? 'Automatic' : 'Manual'}
                   </Typography>
                   
                   

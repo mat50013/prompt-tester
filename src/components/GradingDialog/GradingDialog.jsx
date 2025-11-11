@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   Dialog,
   DialogTitle,
@@ -22,6 +22,7 @@ import { db } from '../../services/databaseService';
 
 const GradingDialog = ({ open, onClose, result }) => {
   const dispatch = useDispatch();
+  const { autoGradingModel } = useSelector(state => state.ui);
   const [gradingMethod, setGradingMethod] = useState('manual');
   const [manualScore, setManualScore] = useState(50);
   const [comments, setComments] = useState('');
@@ -31,6 +32,7 @@ const GradingDialog = ({ open, onClose, result }) => {
 
   const { testCase, modelId, result: testResult } = result;
 
+  console.log(autoGradingModel);
   const handleSubmit = async () => {
     setLoading(true);
     
@@ -42,6 +44,7 @@ const GradingDialog = ({ open, onClose, result }) => {
         gradingMethod,
         manualScore,
         comments,
+        autoGradingModel
       })).unwrap();
       
       console.log('GradingDialog - Received gradeData:', gradeData);
@@ -110,7 +113,7 @@ const GradingDialog = ({ open, onClose, result }) => {
           <FormControlLabel
             value="automatic"
             control={<Radio />}
-            label="Automatic Grading (GPT-4.1)"
+            label={`Automatic Grading (${autoGradingModel})`}
           />
         </RadioGroup>
 
@@ -143,7 +146,7 @@ const GradingDialog = ({ open, onClose, result }) => {
         ) : (
           <Box sx={{ mt: 3 }}>
             <Alert severity="info">
-              GPT-4.1 will automatically evaluate this response based on:
+              {autoGradingModel} will automatically evaluate this response based on:
               <ul style={{ marginTop: 8 }}>
                 <li>The original prompt and context</li>
                 <li>The quality and accuracy of the response</li>

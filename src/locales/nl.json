@@ -105,6 +105,9 @@
       "en": "English",
       "nl": "Nederlands"
     },
+    "autograding": {
+      "title": "Automatisch beoordelingsmodel"
+    },
     "roundTrip": {
       "label": "Schakel Round-Trip Vertaling in",
       "description": "Vertaal prompts van Nederlands naar Engels, verwerk, en vertaal terug"

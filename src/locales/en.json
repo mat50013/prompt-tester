@@ -105,6 +105,9 @@
       "en": "English",
       "nl": "Nederlands"
     },
+    "autograding": {
+      "title": "AutoGrading Model"
+    },
     "roundTrip": {
       "label": "Enable Round-Trip Translation",
       "description": "Translate prompts from Dutch to English, process, then translate back"

@@ -96,11 +96,12 @@ export const runTestCase = createAsyncThunk(
 
 export const gradeResult = createAsyncThunk(
   'results/gradeResult',
-  async ({ testCase, result, modelId, gradingMethod, manualScore, comments }) => {
+  async ({ testCase, result, modelId, gradingMethod, manualScore, comments, autoGradingModel }) => {
     if (gradingMethod === 'automatic') {
       const grade = await openRouterService.autoGrade({
         testCase,
         result,
+        autoGradingModel
       });
       return { testCaseId: testCase.id, modelId, grade };
     } else {

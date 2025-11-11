@@ -14,20 +14,28 @@ import {
   Alert,
   FormControlLabel,
   Switch,
+  Autocomplete,
+  CircularProgress,
 } from '@mui/material';
-import { setTheme, setLanguage, toggleRoundTrip, setTranslationModel, toggleSelfHosted } from '../../store/uiSlice';
+import { setTheme, setLanguage, toggleRoundTrip, setTranslationModel, setAutoGradingModel, toggleSelfHosted } from '../../store/uiSlice';
 import { db } from '../../services/databaseService';
 import i18n from '../../i18n';
+import { fetchAvailableModels } from "../../store/modelsSlice.js";
 
 const SettingsPanel = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { theme, language, enableRoundTrip, translationModel, enabledSelfHosted } = useSelector(state => state.ui);
+  const { theme, language, enableRoundTrip, translationModel, autoGradingModel, enabledSelfHosted } = useSelector(state => state.ui);
+  const { availableModels, loading } = useSelector(state => state.models);
 
   const [llmPath, setLlmPath] = useState('');
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || '');
   const [saveStatus, setSaveStatus] = useState(null);
   const [saveStatusLLM, setSaveStatusLLM] = useState(null);
+
+  useEffect(() => {
+    dispatch(fetchAvailableModels());
+  }, [dispatch]);
 
   useEffect( () => {
       async function fetchLLMUrl() {
@@ -82,7 +90,7 @@ const SettingsPanel = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, overflowY: "auto" }}>
       <Typography variant="h5" gutterBottom>
         {t('settings.title')}
       </Typography>
@@ -114,6 +122,44 @@ const SettingsPanel = () => {
             <MenuItem value="en">{t('settings.language.en')}</MenuItem>
             <MenuItem value="nl">{t('settings.language.nl')}</MenuItem>
           </Select>
+        </FormControl>
+      </Paper>
+
+      <Paper sx={{p:3, mb: 3}}>
+        <Typography variant="h6" gutterBottom>
+          {t('settings.autograding.title')}
+        </Typography>
+
+        <FormControl fullWidth margin="normal">
+          <Autocomplete
+              value={availableModels.find(model => model.id === autoGradingModel) || null}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  dispatch(setAutoGradingModel(newValue.id));
+                }
+              }}
+              options={availableModels}
+              getOptionLabel={(option) => option.name}
+              loading={loading}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                  <TextField
+                      {...params}
+                      label="Model for AutoGrading"
+                      slotProps={{
+                        input: {
+                          ...params.InputProps,
+                          endAdornment: (
+                              <React.Fragment>
+                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                {params.InputProps.endAdornment}
+                              </React.Fragment>
+                          ),
+                        },
+                      }}
+                  />
+              )}
+          />
         </FormControl>
       </Paper>
 
@@ -234,21 +280,36 @@ const SettingsPanel = () => {
 
         {enableRoundTrip && (
           <>
-            <Typography variant="subtitle2" sx={{ mt: 3, mb: 1 }}>
-              Translation Model
-            </Typography>
             <FormControl fullWidth margin="normal">
-              <InputLabel>Model for Translation</InputLabel>
-              <Select
-                value={translationModel}
-                onChange={(e) => dispatch(setTranslationModel(e.target.value))}
-                label="Model for Translation"
-              >
-                <MenuItem value="openai/gpt-4.1">GPT-4.1</MenuItem>
-                <MenuItem value="openai/gpt-4o">GPT-4o</MenuItem>
-                <MenuItem value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</MenuItem>
-                <MenuItem value="anthropic/claude-3-haiku">Claude 3 Haiku</MenuItem>
-              </Select>
+              <Autocomplete
+                value={availableModels.find(model => model.id === translationModel) || null}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    dispatch(setTranslationModel(newValue.id));
+                  }
+                }}
+                options={availableModels}
+                getOptionLabel={(option) => option.name}
+                loading={loading}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        label="Model for Translation"
+                        slotProps={{
+                          input: {
+                            ...params.InputProps,
+                            endAdornment: (
+                                <React.Fragment>
+                                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                  {params.InputProps.endAdornment}
+                                </React.Fragment>
+                            ),
+                          },
+                        }}
+                    />
+                )}
+              />
             </FormControl>
             <Typography variant="body2" color="text.secondary">
               Choose which model to use for Dutch ↔ English translations

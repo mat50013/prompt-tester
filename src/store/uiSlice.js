@@ -4,7 +4,8 @@ const initialState = {
   theme: 'light',
   language: 'en',
   enableRoundTrip: false,
-  translationModel: 'openai/gpt-4.1',
+  translationModel: '',
+  autoGradingModel: 'openai/gpt-4.1',
   showDiffView: true,
   activeTab: 'editor',
   enabledSelfHosted: false,
@@ -34,6 +35,9 @@ const uiSlice = createSlice({
     },
     setTranslationModel: (state, action) => {
       state.translationModel = action.payload;
+    },
+    setAutoGradingModel: (state, action) => {
+      state.autoGradingModel = action.payload;
     },
     toggleDiffView: (state) => {
       state.showDiffView = !state.showDiffView;
@@ -69,6 +73,7 @@ export const {
   addNotification,
   removeNotification,
   toggleSelfHosted,
+  setAutoGradingModel
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
