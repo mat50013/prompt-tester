@@ -1,11 +1,10 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { openRouterService } from '../services/openRouterService';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {openRouterService} from '../services/openRouterService';
 
 export const fetchAvailableModels = createAsyncThunk(
   'models/fetchAvailable',
-  async () => {
-    const models = await openRouterService.getAvailableModels();
-    return models;
+  async ({searchTerm, limit}) => {
+    return await openRouterService.getAvailableModels(searchTerm, limit);
   }
 );
 
@@ -38,6 +37,9 @@ const modelsSlice = createSlice({
     setSelectedModels: (state, action) => {
       state.selectedModels = action.payload;
     },
+    clearAvailableModels: (state) => {
+      state.availableModels = [];
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -61,6 +63,7 @@ export const {
   selectAllModels,
   deselectAllModels,
   setSelectedModels,
+  clearAvailableModels,
 } = modelsSlice.actions;
 
 export default modelsSlice.reducer;

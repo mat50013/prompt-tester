@@ -104,13 +104,15 @@ class OpenRouterService {
       } else {
         // OpenRouter API
         const response = await client.get('/v1/models');
-        return response.data.data.map(model => ({
+        const filtered = response.data.data.map(model => ({
           id: model.id,
           name: model.name || model.id,
           description: model.description,
           contextLength: model.context_length,
           pricing: model.pricing,
-        }));
+        })).filter(model => searchQuery === '' || model.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        const sliced = filtered.slice(0, limit);
+        return sliced;
       }
     } catch (error) {
       console.error('Error fetching models:', error);

@@ -31,7 +31,7 @@ const uiSlice = createSlice({
       state.enableRoundTrip = !state.enableRoundTrip;
     },
     toggleSelfHosted: (state) => {
-        state.enabledSelfHosted = !state.enabledSelfHosted;
+      state.enabledSelfHosted = !state.enabledSelfHosted;
     },
     setTranslationModel: (state, action) => {
       state.translationModel = action.payload;

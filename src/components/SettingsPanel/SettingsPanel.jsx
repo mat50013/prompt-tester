@@ -20,7 +20,6 @@ import {
 import { setTheme, setLanguage, toggleRoundTrip, setTranslationModel, setAutoGradingModel, toggleSelfHosted } from '../../store/uiSlice';
 import { db } from '../../services/databaseService';
 import i18n from '../../i18n';
-import { fetchAvailableModels } from "../../store/modelsSlice.js";
 
 const SettingsPanel = () => {
   const { t } = useTranslation();
@@ -32,10 +31,6 @@ const SettingsPanel = () => {
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || '');
   const [saveStatus, setSaveStatus] = useState(null);
   const [saveStatusLLM, setSaveStatusLLM] = useState(null);
-
-  useEffect(() => {
-    dispatch(fetchAvailableModels());
-  }, [dispatch]);
 
   useEffect( () => {
       async function fetchLLMUrl() {
@@ -295,7 +290,7 @@ const SettingsPanel = () => {
                 renderInput={(params) => (
                     <TextField
                         {...params}
-                        label="Model for Translation"
+                        label="Model for Translation (If nothing appears first search for something in model page)"
                         slotProps={{
                           input: {
                             ...params.InputProps,

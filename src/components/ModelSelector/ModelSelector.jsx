@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -18,6 +18,8 @@ import {
   Alert,
   IconButton,
   Collapse,
+  InputBase,
+  Divider,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -29,6 +31,7 @@ import {
 import {
   fetchAvailableModels,
   toggleModelSelection,
+  clearAvailableModels,
   selectAllModels,
   deselectAllModels,
 } from '../../store/modelsSlice';
@@ -36,13 +39,17 @@ import {
 const ModelSelector = () => {
   const dispatch = useDispatch();
   const { availableModels, selectedModels, loading, error } = useSelector(state => state.models);
+  const { enabledSelfHosted } = useSelector(state => state.ui);
   
   const [searchTerm, setSearchTerm] = useState('');
+  const [queryTerm, setQueryTerm] = useState('');
+  const [limit, setLimit] = useState(500);
   const [expandedGroups, setExpandedGroups] = useState({});
 
-  useEffect(() => {
-    dispatch(fetchAvailableModels());
-  }, [dispatch]);
+  const handlerQueryRequest = function() {
+    dispatch(fetchAvailableModels({searchTerm: queryTerm, limit}));
+    setSearchTerm('');
+  };
 
   const filteredModels = availableModels.filter(model =>
     model.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,6 +82,13 @@ const ModelSelector = () => {
     return `$${prompt}/1K in, $${completion}/1K out`;
   };
 
+  useEffect(() => {
+    setSearchTerm('');
+    setQueryTerm('');
+    dispatch(deselectAllModels());
+    dispatch(clearAvailableModels());
+  }, [dispatch, enabledSelfHosted]);
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -102,16 +116,48 @@ const ModelSelector = () => {
         </Typography>
       </Box>
 
+      <Paper component="form" sx={{ p: '2px 4px', display: 'inline-flex', alignItems: 'space-between', flexWrap: 'nowrap', flexDirection: 'row', mb: 2 }}>
+        <InputBase
+            sx={{ ml: 1, flex: 1, minWidth: 0 }}
+            placeholder="Query models endpoint..."
+            inputProps={{ 'aria-label': 'query models endpoint', minLength: 1 }}
+            value={queryTerm}
+            onChange={(e) => setQueryTerm(e.target.value)}
+            required
+        />
+        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical"/>
+        <InputBase
+            sx={{ ml: 1, width: '80px' }}
+            placeholder="Limit"
+            type="number"
+            inputProps={{
+              'aria-label': 'result limit',
+              min: 1,
+              max: 1000
+            }}
+            value={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+        />
+        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical"/>
+        <IconButton
+            type="button"
+            sx={{ p: '10px', color: 'primary.main' }}
+            aria-label="search"
+            disabled={queryTerm.trim().length < 1}
+            onClick={handlerQueryRequest}
+        >
+          <SearchIcon />
+        </IconButton>
+      </Paper>
+
       <TextField
         fullWidth
-        placeholder="Search models..."
+        placeholder="Search models local..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         InputProps={{
           startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
+            <InputAdornment position="start" />
           ),
         }}
         sx={{ mb: 2 }}
