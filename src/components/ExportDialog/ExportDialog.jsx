@@ -24,9 +24,9 @@ import {
 import { exportToExcel, exportToCSV, exportToJSON } from '../../utils/exportUtils';
 
 const ExportDialog = ({ open, onClose }) => {
-  const { testCases } = useSelector(state => state.testCases);
-  const { results, grades } = useSelector(state => state.results);
-  
+  const { testCases } = useSelector((state) => state.testCases);
+  const { results, grades } = useSelector((state) => state.results);
+
   const [exportFormat, setExportFormat] = useState('excel');
   const [includeOptions, setIncludeOptions] = useState({
     testCases: true,
@@ -38,7 +38,7 @@ const ExportDialog = ({ open, onClose }) => {
 
   const handleExport = async () => {
     setLoading(true);
-    
+
     try {
       const exportData = {
         testCases: includeOptions.testCases ? testCases : [],
@@ -58,7 +58,7 @@ const ExportDialog = ({ open, onClose }) => {
           await exportToJSON(exportData);
           break;
       }
-      
+
       onClose();
     } catch (error) {
       console.error('Export failed:', error);
@@ -68,7 +68,7 @@ const ExportDialog = ({ open, onClose }) => {
   };
 
   const handleOptionChange = (option) => {
-    setIncludeOptions(prev => ({
+    setIncludeOptions((prev) => ({
       ...prev,
       [option]: !prev[option],
     }));
@@ -89,11 +89,8 @@ const ExportDialog = ({ open, onClose }) => {
             <Typography variant="subtitle1" gutterBottom>
               Select Export Format:
             </Typography>
-            
-            <RadioGroup
-              value={exportFormat}
-              onChange={(e) => setExportFormat(e.target.value)}
-            >
+
+            <RadioGroup value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
               <FormControlLabel
                 value="excel"
                 control={<Radio />}
@@ -129,7 +126,7 @@ const ExportDialog = ({ open, onClose }) => {
             <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>
               Include in Export:
             </Typography>
-            
+
             <FormGroup>
               <FormControlLabel
                 control={
@@ -171,8 +168,8 @@ const ExportDialog = ({ open, onClose }) => {
 
             {exportFormat === 'excel' && (
               <Alert severity="info" sx={{ mt: 2 }}>
-                Excel export will create multiple sheets: Test Cases, Results, 
-                Grades, and a Summary sheet with all scores.
+                Excel export will create multiple sheets: Test Cases, Results, Grades, and a Summary
+                sheet with all scores.
               </Alert>
             )}
           </Box>
@@ -182,11 +179,7 @@ const ExportDialog = ({ open, onClose }) => {
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button
-          onClick={handleExport}
-          variant="contained"
-          disabled={loading || !hasData}
-        >
+        <Button onClick={handleExport} variant="contained" disabled={loading || !hasData}>
           {loading ? <CircularProgress size={24} /> : 'Export'}
         </Button>
       </DialogActions>

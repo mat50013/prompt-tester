@@ -1,11 +1,12 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {openRouterService} from '../services/openRouterService';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { openRouterService } from '../services/openRouterService';
+import { toggleSelfHosted } from './uiSlice.js';
 
 export const fetchAvailableModels = createAsyncThunk(
   'models/fetchAvailable',
-  async ({searchTerm, limit}) => {
+  async ({ searchTerm, limit }) => {
     return await openRouterService.getAvailableModels(searchTerm, limit);
-  }
+  },
 );
 
 const initialState = {
@@ -29,7 +30,7 @@ const modelsSlice = createSlice({
       }
     },
     selectAllModels: (state) => {
-      state.selectedModels = state.availableModels.map(m => m.id);
+      state.selectedModels = state.availableModels.map((m) => m.id);
     },
     deselectAllModels: (state) => {
       state.selectedModels = [];
@@ -39,7 +40,7 @@ const modelsSlice = createSlice({
     },
     clearAvailableModels: (state) => {
       state.availableModels = [];
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -54,6 +55,10 @@ const modelsSlice = createSlice({
       .addCase(fetchAvailableModels.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      .addCase(toggleSelfHosted, (state) => {
+        state.selectedModels = [];
+        state.availableModels = [];
       });
   },
 });

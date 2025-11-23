@@ -32,13 +32,13 @@ import { db } from '../../services/databaseService';
 
 const TestEditor = () => {
   const dispatch = useDispatch();
-  const { testCases, activeTestCaseId } = useSelector(state => state.testCases);
-  const { selectedModels } = useSelector(state => state.models);
-  const { enableRoundTrip, translationModel } = useSelector(state => state.ui);
-  const { executionStatus } = useSelector(state => state.results);
-  
-  const activeTestCase = testCases.find(tc => tc.id === activeTestCaseId);
-  
+  const { testCases, activeTestCaseId } = useSelector((state) => state.testCases);
+  const { selectedModels } = useSelector((state) => state.models);
+  const { enableRoundTrip, translationModel } = useSelector((state) => state.ui);
+  const { executionStatus } = useSelector((state) => state.results);
+
+  const activeTestCase = testCases.find((tc) => tc.id === activeTestCaseId);
+
   const [formData, setFormData] = useState({
     name: '',
     systemPrompt: '',
@@ -63,26 +63,28 @@ const TestEditor = () => {
   }, [activeTestCase]);
 
   const handleFieldChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setHasUnsavedChanges(true);
   };
 
   const handleSave = async () => {
     if (!activeTestCaseId) return;
-    
+
     const updatedTestCase = {
       id: activeTestCaseId,
       ...formData,
     };
-    
+
     dispatch(updateTestCase(updatedTestCase));
     await db.saveTestCase(updatedTestCase);
     setHasUnsavedChanges(false);
-    
-    dispatch(addNotification({
-      type: 'success',
-      message: 'Test case saved successfully',
-    }));
+
+    dispatch(
+      addNotification({
+        type: 'success',
+        message: 'Test case saved successfully',
+      }),
+    );
   };
 
   const handleNewTestCase = async () => {
@@ -93,10 +95,10 @@ const TestEditor = () => {
       sourceText: '',
       expectedResult: '',
     };
-    
+
     const action = dispatch(addTestCase(newTestCase));
     const createdTestCase = action.payload;
-    
+
     // Save to database
     try {
       await db.saveTestCase(createdTestCase);
@@ -107,38 +109,46 @@ const TestEditor = () => {
 
   const handleDeleteTestCase = async () => {
     if (!activeTestCaseId) return;
-    
+
     if (window.confirm('Are you sure you want to delete this test case?')) {
       dispatch(deleteTestCase(activeTestCaseId));
       await db.deleteTestCase(activeTestCaseId);
-      
-      dispatch(addNotification({
-        type: 'info',
-        message: 'Test case deleted',
-      }));
+
+      dispatch(
+        addNotification({
+          type: 'info',
+          message: 'Test case deleted',
+        }),
+      );
     }
   };
 
   const handleRunTest = () => {
     if (!activeTestCase || selectedModels.length === 0) {
-      dispatch(addNotification({
-        type: 'warning',
-        message: 'Please select at least one model before running the test',
-      }));
+      dispatch(
+        addNotification({
+          type: 'warning',
+          message: 'Please select at least one model before running the test',
+        }),
+      );
       return;
     }
 
-    dispatch(runTestCase({
-      testCase: activeTestCase,
-      models: selectedModels,
-      enableRoundTrip,
-      translationModel,
-    }));
+    dispatch(
+      runTestCase({
+        testCase: activeTestCase,
+        models: selectedModels,
+        enableRoundTrip,
+        translationModel,
+      }),
+    );
   };
 
   // Check if any model is currently running for this test case
-  const isTestRunning = activeTestCaseId && executionStatus[activeTestCaseId] && 
-    Object.values(executionStatus[activeTestCaseId]).some(status => status === 'running');
+  const isTestRunning =
+    activeTestCaseId &&
+    executionStatus[activeTestCaseId] &&
+    Object.values(executionStatus[activeTestCaseId]).some((status) => status === 'running');
 
   const handleTabChange = (event, newValue) => {
     if (hasUnsavedChanges) {
@@ -153,7 +163,7 @@ const TestEditor = () => {
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
         <Tabs value={activeTestCaseId} onChange={handleTabChange} sx={{ flexGrow: 1 }}>
-          {testCases.map(tc => (
+          {testCases.map((tc) => (
             <Tab key={tc.id} value={tc.id} label={tc.name} />
           ))}
         </Tabs>
@@ -179,7 +189,9 @@ const TestEditor = () => {
                   Save
                 </Button>
                 <Button
-                  startIcon={isTestRunning ? <CircularProgress size={20} color="inherit" /> : <RunIcon />}
+                  startIcon={
+                    isTestRunning ? <CircularProgress size={20} color="inherit" /> : <RunIcon />
+                  }
                   onClick={handleRunTest}
                   variant="contained"
                   disabled={selectedModels.length === 0 || isTestRunning}
@@ -251,8 +263,8 @@ const TestEditor = () => {
 
             {enableRoundTrip && (
               <Alert severity="info" sx={{ mt: 2 }}>
-                Round-trip translation mode is enabled. The prompt will be translated from Dutch to English,
-                processed, and then translated back to Dutch.
+                Round-trip translation mode is enabled. The prompt will be translated from Dutch to
+                English, processed, and then translated back to Dutch.
               </Alert>
             )}
 
@@ -263,11 +275,16 @@ const TestEditor = () => {
                   Running test on selected models...
                 </Typography>
                 <Box sx={{ mt: 1 }}>
-                  {selectedModels.map(modelId => {
+                  {selectedModels.map((modelId) => {
                     const status = executionStatus[activeTestCaseId]?.[modelId];
                     return (
                       <Typography key={modelId} variant="caption" display="block">
-                        {modelId}: {status === 'running' ? '⏳ Running...' : status === 'completed' ? '✅ Completed' : '⏸️ Waiting'}
+                        {modelId}:{' '}
+                        {status === 'running'
+                          ? '⏳ Running...'
+                          : status === 'completed'
+                            ? '✅ Completed'
+                            : '⏸️ Waiting'}
                       </Typography>
                     );
                   })}
@@ -277,7 +294,9 @@ const TestEditor = () => {
           </Paper>
         </Box>
       ) : (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
+        >
           <Typography variant="h6" color="text.secondary">
             No test cases yet. Click the + button to create one.
           </Typography>

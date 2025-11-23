@@ -6,15 +6,15 @@ export async function exportToExcel(data) {
 
   const workbook = XLSX.utils.book_new();
 
-  const testCasesData = testCases.map(tc => ({
+  const testCasesData = testCases.map((tc) => ({
     'Test ID': tc.id,
-    'Name': tc.name,
+    Name: tc.name,
     'System Prompt': tc.systemPrompt,
     'User Prompt': tc.userPrompt,
     'Source Text': tc.sourceText,
     'Expected Result': tc.expectedResult,
-    'Created': new Date(tc.createdAt).toLocaleString(),
-    'Updated': new Date(tc.updatedAt).toLocaleString(),
+    Created: new Date(tc.createdAt).toLocaleString(),
+    Updated: new Date(tc.updatedAt).toLocaleString(),
   }));
 
   const resultsData = [];
@@ -22,14 +22,14 @@ export async function exportToExcel(data) {
     Object.entries(modelResults).forEach(([modelId, result]) => {
       resultsData.push({
         'Test ID': testCaseId,
-        'Model': modelId,
-        'Output': result.output,
+        Model: modelId,
+        Output: result.output,
         'Round Trip Output': result.roundTripOutput || '',
         'Tokens Used': result.tokensUsed,
         'Latency (ms)': result.latency,
-        'Status': result.status,
-        'Error': result.error || '',
-        'Timestamp': new Date(result.timestamp).toLocaleString(),
+        Status: result.status,
+        Error: result.error || '',
+        Timestamp: new Date(result.timestamp).toLocaleString(),
       });
     });
   });
@@ -39,10 +39,10 @@ export async function exportToExcel(data) {
     Object.entries(modelGrades).forEach(([modelId, grade]) => {
       gradesData.push({
         'Test ID': testCaseId,
-        'Model': modelId,
-        'Score': grade.score,
-        'Method': grade.method,
-        'Comments': grade.comments || grade.feedback || '',
+        Model: modelId,
+        Score: grade.score,
+        Method: grade.method,
+        Comments: grade.comments || grade.feedback || '',
         'Graded At': new Date(grade.timestamp).toLocaleString(),
       });
     });
@@ -61,7 +61,7 @@ export async function exportToExcel(data) {
     XLSX.utils.book_append_sheet(workbook, gradesSheet, 'Grades');
   }
 
-  const summaryData = testCases.map(tc => {
+  const summaryData = testCases.map((tc) => {
     const row = {
       'Test Name': tc.name,
     };
@@ -69,14 +69,14 @@ export async function exportToExcel(data) {
     const testResults = results[tc.id] || {};
     const testGrades = grades[tc.id] || {};
 
-    Object.keys(testResults).forEach(modelId => {
+    Object.keys(testResults).forEach((modelId) => {
       const result = testResults[modelId];
       const grade = testGrades[modelId];
-      
+
       row[`${modelId} - Status`] = result.status;
       row[`${modelId} - Score`] = grade?.score || 'N/A';
-      row[`${modelId} - Similarity`] = result.diff?.similarity 
-        ? `${result.diff.similarity.toFixed(1)}%` 
+      row[`${modelId} - Similarity`] = result.diff?.similarity
+        ? `${result.diff.similarity.toFixed(1)}%`
         : 'N/A';
     });
 
@@ -89,10 +89,10 @@ export async function exportToExcel(data) {
   }
 
   const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  const blob = new Blob([excelBuffer], { 
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  const blob = new Blob([excelBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
-  
+
   const filename = `prompt-test-results-${new Date().toISOString().split('T')[0]}.xlsx`;
   saveAs(blob, filename);
 }
@@ -102,14 +102,14 @@ export async function exportToCSV(data) {
 
   const rows = ['Test Name,Model,Status,Output,Score,Similarity,Tokens,Latency'];
 
-  testCases.forEach(tc => {
+  testCases.forEach((tc) => {
     const testResults = results[tc.id] || {};
     const testGrades = grades[tc.id] || {};
 
     Object.entries(testResults).forEach(([modelId, result]) => {
       const grade = testGrades[modelId];
       const similarity = result.diff?.similarity?.toFixed(1) || 'N/A';
-      
+
       const row = [
         tc.name,
         modelId,
@@ -120,7 +120,7 @@ export async function exportToCSV(data) {
         result.tokensUsed || 0,
         result.latency || 0,
       ].join(',');
-      
+
       rows.push(row);
     });
   });

@@ -32,13 +32,13 @@ const testCasesSlice = createSlice({
     },
     updateTestCase: (state, action) => {
       const { id, ...updates } = action.payload;
-      const testCase = state.testCases.find(tc => tc.id === id);
+      const testCase = state.testCases.find((tc) => tc.id === id);
       if (testCase) {
         Object.assign(testCase, updates, { updatedAt: new Date().toISOString() });
       }
     },
     deleteTestCase: (state, action) => {
-      state.testCases = state.testCases.filter(tc => tc.id !== action.payload);
+      state.testCases = state.testCases.filter((tc) => tc.id !== action.payload);
       if (state.activeTestCaseId === action.payload) {
         state.activeTestCaseId = state.testCases[0]?.id || null;
       }
@@ -53,12 +53,7 @@ const testCasesSlice = createSlice({
   },
 });
 
-export const {
-  addTestCase,
-  updateTestCase,
-  deleteTestCase,
-  setActiveTestCase,
-  loadTestCases,
-} = testCasesSlice.actions;
+export const { addTestCase, updateTestCase, deleteTestCase, setActiveTestCase, loadTestCases } =
+  testCasesSlice.actions;
 
 export default testCasesSlice.reducer;

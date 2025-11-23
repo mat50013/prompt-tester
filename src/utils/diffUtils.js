@@ -5,7 +5,7 @@ export function calculateDiff(expected, actual) {
 
   const expectedLines = expected.split('\n');
   const actualLines = actual.split('\n');
-  
+
   const diff = {
     added: [],
     removed: [],

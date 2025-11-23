@@ -27,11 +27,11 @@ const uiSlice = createSlice({
     setLanguage: (state, action) => {
       state.language = action.payload;
     },
-    toggleRoundTrip: (state) => {
-      state.enableRoundTrip = !state.enableRoundTrip;
+    toggleRoundTrip: (state, action) => {
+      state.enableRoundTrip = action.payload;
     },
-    toggleSelfHosted: (state) => {
-      state.enabledSelfHosted = !state.enabledSelfHosted;
+    toggleSelfHosted: (state, action) => {
+      state.enabledSelfHosted = action.payload;
     },
     setTranslationModel: (state, action) => {
       state.translationModel = action.payload;
@@ -55,9 +55,7 @@ const uiSlice = createSlice({
       });
     },
     removeNotification: (state, action) => {
-      state.notifications = state.notifications.filter(
-        n => n.id !== action.payload
-      );
+      state.notifications = state.notifications.filter((n) => n.id !== action.payload);
     },
   },
 });
@@ -73,7 +71,7 @@ export const {
   addNotification,
   removeNotification,
   toggleSelfHosted,
-  setAutoGradingModel
+  setAutoGradingModel,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

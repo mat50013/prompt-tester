@@ -7,22 +7,24 @@ export const runTestCase = createAsyncThunk(
   'results/runTestCase',
   async ({ testCase, models, enableRoundTrip, translationModel }, { dispatch }) => {
     const results = {};
-    
+
     for (const modelId of models) {
       try {
-        dispatch(updateExecutionStatus({ 
-          testCaseId: testCase.id, 
-          modelId, 
-          status: 'running' 
-        }));
-        
+        dispatch(
+          updateExecutionStatus({
+            testCaseId: testCase.id,
+            modelId,
+            status: 'running',
+          }),
+        );
+
         let response;
         if (enableRoundTrip) {
           response = await openRouterService.runRoundTripTest(testCase, modelId, translationModel);
         } else {
           response = await openRouterService.runTest(testCase, modelId);
         }
-        
+
         const result = {
           testCaseId: testCase.id,
           modelId,
@@ -34,16 +36,13 @@ export const runTestCase = createAsyncThunk(
           timestamp: new Date().toISOString(),
           status: 'completed',
         };
-        
+
         if (testCase.expectedResult) {
-          result.diff = calculateDiff(
-            testCase.expectedResult, 
-            response.output
-          );
+          result.diff = calculateDiff(testCase.expectedResult, response.output);
         }
-        
+
         results[modelId] = result;
-        
+
         // Save to database immediately after each model completes
         try {
           await db.saveResult(result);
@@ -51,14 +50,15 @@ export const runTestCase = createAsyncThunk(
         } catch (dbError) {
           console.error('Failed to save result to database:', dbError);
         }
-        
+
         // Update state to show progress in real-time
-        dispatch(addSingleResult({ 
-          testCaseId: testCase.id, 
-          modelId, 
-          result 
-        }));
-        
+        dispatch(
+          addSingleResult({
+            testCaseId: testCase.id,
+            modelId,
+            result,
+          }),
+        );
       } catch (error) {
         const errorResult = {
           testCaseId: testCase.id,
@@ -67,7 +67,7 @@ export const runTestCase = createAsyncThunk(
           status: 'failed',
           timestamp: new Date().toISOString(),
         };
-        
+
         results[modelId] = errorResult;
         try {
           await db.saveResult(errorResult);
@@ -75,23 +75,27 @@ export const runTestCase = createAsyncThunk(
         } catch (dbError) {
           console.error('Failed to save error result to database:', dbError);
         }
-        
-        dispatch(addSingleResult({ 
-          testCaseId: testCase.id, 
-          modelId, 
-          result: errorResult 
-        }));
+
+        dispatch(
+          addSingleResult({
+            testCaseId: testCase.id,
+            modelId,
+            result: errorResult,
+          }),
+        );
       }
-      
-      dispatch(updateExecutionStatus({ 
-        testCaseId: testCase.id, 
-        modelId, 
-        status: 'completed' 
-      }));
+
+      dispatch(
+        updateExecutionStatus({
+          testCaseId: testCase.id,
+          modelId,
+          status: 'completed',
+        }),
+      );
     }
-    
+
     return { testCaseId: testCase.id, results };
-  }
+  },
 );
 
 export const gradeResult = createAsyncThunk(
@@ -101,7 +105,7 @@ export const gradeResult = createAsyncThunk(
       const grade = await openRouterService.autoGrade({
         testCase,
         result,
-        autoGradingModel
+        autoGradingModel,
       });
       return { testCaseId: testCase.id, modelId, grade };
     } else {
@@ -116,7 +120,7 @@ export const gradeResult = createAsyncThunk(
         },
       };
     }
-  }
+  },
 );
 
 const initialState = {
@@ -179,7 +183,7 @@ const resultsSlice = createSlice({
     deleteAllResultsForModel: (state, action) => {
       const { modelId } = action.payload;
       // Remove this model from all test cases
-      Object.keys(state.results).forEach(testCaseId => {
+      Object.keys(state.results).forEach((testCaseId) => {
         if (state.results[testCaseId][modelId]) {
           delete state.results[testCaseId][modelId];
           // If no more results for this test case, remove the test case entry
@@ -188,7 +192,7 @@ const resultsSlice = createSlice({
           }
         }
       });
-      Object.keys(state.grades).forEach(testCaseId => {
+      Object.keys(state.grades).forEach((testCaseId) => {
         if (state.grades[testCaseId][modelId]) {
           delete state.grades[testCaseId][modelId];
           // If no more grades for this test case, remove the test case entry
@@ -197,7 +201,7 @@ const resultsSlice = createSlice({
           }
         }
       });
-      Object.keys(state.executionStatus).forEach(testCaseId => {
+      Object.keys(state.executionStatus).forEach((testCaseId) => {
         if (state.executionStatus[testCaseId][modelId]) {
           delete state.executionStatus[testCaseId][modelId];
           // If no more execution status for this test case, remove the test case entry
@@ -237,7 +241,11 @@ const resultsSlice = createSlice({
       })
       .addCase(gradeResult.fulfilled, (state, action) => {
         const { testCaseId, modelId, grade } = action.payload;
-        console.log('gradeResult.fulfilled - Saving grade to state:', { testCaseId, modelId, grade });
+        console.log('gradeResult.fulfilled - Saving grade to state:', {
+          testCaseId,
+          modelId,
+          grade,
+        });
         if (!state.grades[testCaseId]) {
           state.grades[testCaseId] = {};
         }
@@ -246,6 +254,14 @@ const resultsSlice = createSlice({
   },
 });
 
-export const { updateExecutionStatus, addSingleResult, addGrade, deleteResult, deleteAllResultsForModel, clearResults, loadResults } = resultsSlice.actions;
+export const {
+  updateExecutionStatus,
+  addSingleResult,
+  addGrade,
+  deleteResult,
+  deleteAllResultsForModel,
+  clearResults,
+  loadResults,
+} = resultsSlice.actions;
 
 export default resultsSlice.reducer;

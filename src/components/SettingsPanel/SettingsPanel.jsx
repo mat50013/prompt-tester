@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,30 +17,44 @@ import {
   Autocomplete,
   CircularProgress,
 } from '@mui/material';
-import { setTheme, setLanguage, toggleRoundTrip, setTranslationModel, setAutoGradingModel, toggleSelfHosted } from '../../store/uiSlice';
+import {
+  setTheme,
+  setLanguage,
+  toggleRoundTrip,
+  setTranslationModel,
+  setAutoGradingModel,
+  toggleSelfHosted,
+} from '../../store/uiSlice';
 import { db } from '../../services/databaseService';
 import i18n from '../../i18n';
 
 const SettingsPanel = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { theme, language, enableRoundTrip, translationModel, autoGradingModel, enabledSelfHosted } = useSelector(state => state.ui);
-  const { availableModels, loading } = useSelector(state => state.models);
+  const {
+    theme,
+    language,
+    enableRoundTrip,
+    translationModel,
+    autoGradingModel,
+    enabledSelfHosted,
+  } = useSelector((state) => state.ui);
+  const { availableModels, loading } = useSelector((state) => state.models);
 
   const [llmPath, setLlmPath] = useState('');
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || '');
   const [saveStatus, setSaveStatus] = useState(null);
   const [saveStatusLLM, setSaveStatusLLM] = useState(null);
 
-  useEffect( () => {
-      async function fetchLLMUrl() {
-        const settingLLMUrl = await db.getSetting("llmFrogPath");
-        if (settingLLMUrl) {
-          setLlmPath(settingLLMUrl);
-        }
+  useEffect(() => {
+    async function fetchLLMUrl() {
+      const settingLLMUrl = await db.getSetting('llmFrogPath');
+      if (settingLLMUrl) {
+        setLlmPath(settingLLMUrl);
       }
+    }
 
-      fetchLLMUrl();
+    fetchLLMUrl();
   }, []);
 
   const handleThemeChange = (event) => {
@@ -85,7 +99,7 @@ const SettingsPanel = () => {
   };
 
   return (
-    <Box sx={{ p: 3, overflowY: "auto" }}>
+    <Box sx={{ p: 3, overflowY: 'auto' }}>
       <Typography variant="h5" gutterBottom>
         {t('settings.title')}
       </Typography>
@@ -94,14 +108,10 @@ const SettingsPanel = () => {
         <Typography variant="h6" gutterBottom>
           Appearance
         </Typography>
-        
+
         <FormControl fullWidth margin="normal">
           <InputLabel>{t('settings.theme.label')}</InputLabel>
-          <Select
-            value={theme}
-            onChange={handleThemeChange}
-            label={t('settings.theme.label')}
-          >
+          <Select value={theme} onChange={handleThemeChange} label={t('settings.theme.label')}>
             <MenuItem value="light">{t('settings.theme.light')}</MenuItem>
             <MenuItem value="dark">{t('settings.theme.dark')}</MenuItem>
           </Select>
@@ -120,40 +130,40 @@ const SettingsPanel = () => {
         </FormControl>
       </Paper>
 
-      <Paper sx={{p:3, mb: 3}}>
+      <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           {t('settings.autograding.title')}
         </Typography>
 
         <FormControl fullWidth margin="normal">
           <Autocomplete
-              value={availableModels.find(model => model.id === autoGradingModel) || null}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  dispatch(setAutoGradingModel(newValue.id));
-                }
-              }}
-              options={availableModels}
-              getOptionLabel={(option) => option.name}
-              loading={loading}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              renderInput={(params) => (
-                  <TextField
-                      {...params}
-                      label="Model for AutoGrading"
-                      slotProps={{
-                        input: {
-                          ...params.InputProps,
-                          endAdornment: (
-                              <React.Fragment>
-                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                {params.InputProps.endAdornment}
-                              </React.Fragment>
-                          ),
-                        },
-                      }}
-                  />
-              )}
+            value={availableModels.find((model) => model.id === autoGradingModel) || null}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                dispatch(setAutoGradingModel(newValue.id));
+              }
+            }}
+            options={availableModels}
+            getOptionLabel={(option) => option.name}
+            loading={loading}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Model for AutoGrading"
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    endAdornment: (
+                      <React.Fragment>
+                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </React.Fragment>
+                    ),
+                  },
+                }}
+              />
+            )}
           />
         </FormControl>
       </Paper>
@@ -162,7 +172,7 @@ const SettingsPanel = () => {
         <Typography variant="h6" gutterBottom>
           {t('settings.api.title')}
         </Typography>
-        
+
         <TextField
           fullWidth
           type="password"
@@ -172,21 +182,17 @@ const SettingsPanel = () => {
           margin="normal"
           helperText={t('settings.api.keyHelper')}
         />
-        
-        <Button
-          variant="contained"
-          onClick={handleApiKeySave}
-          sx={{ mt: 2 }}
-        >
+
+        <Button variant="contained" onClick={handleApiKeySave} sx={{ mt: 2 }}>
           {t('common.save')}
         </Button>
-        
+
         {saveStatus === 'success' && (
           <Alert severity="success" sx={{ mt: 2 }}>
             API key saved successfully
           </Alert>
         )}
-        
+
         {saveStatus === 'error' && (
           <Alert severity="error" sx={{ mt: 2 }}>
             Failed to save API key
@@ -200,13 +206,13 @@ const SettingsPanel = () => {
         </Typography>
 
         <FormControlLabel
-            control={
-              <Switch
-                checked={enabledSelfHosted}
-                onChange={() => dispatch(toggleSelfHosted())}
-              />
-            }
-            label={t('settings.selfHostedLLM.label')}
+          control={
+            <Switch
+              checked={enabledSelfHosted}
+              onChange={() => dispatch(toggleSelfHosted(!enabledSelfHosted))}
+            />
+          }
+          label={t('settings.selfHostedLLM.label')}
         />
 
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -214,61 +220,55 @@ const SettingsPanel = () => {
         </Typography>
 
         {enabledSelfHosted && (
-            <>
-              <Typography variant="h6" gutterBottom>
-                {t('settings.selfHostedLLM.activated.title')}
-              </Typography>
+          <>
+            <Typography variant="h6" gutterBottom>
+              {t('settings.selfHostedLLM.activated.title')}
+            </Typography>
 
-              <TextField
-                  fullWidth
-                  type="url"
-                  label={t('settings.selfHostedLLM.activated.label')}
-                  value={llmPath}
-                  onChange={(e) => setLlmPath(e.target.value)}
-                  margin="normal"
-                  helperText={t('settings.selfHostedLLM.activated.helper')}
-              />
+            <TextField
+              fullWidth
+              type="url"
+              label={t('settings.selfHostedLLM.activated.label')}
+              value={llmPath}
+              onChange={(e) => setLlmPath(e.target.value)}
+              margin="normal"
+              helperText={t('settings.selfHostedLLM.activated.helper')}
+            />
 
-              <Button
-                  variant="contained"
-                  onClick={handleFROGLlmPathSave}
-                  sx={{ mt: 2 }}
-              >
-                {t('common.save')}
-              </Button>
+            <Button variant="contained" onClick={handleFROGLlmPathSave} sx={{ mt: 2 }}>
+              {t('common.save')}
+            </Button>
 
-              {saveStatusLLM === 'success' && (
-                  <Alert severity="success" sx={{ mt: 2 }}>
-                    LLMFrog url saved successfully
-                  </Alert>
-              )}
+            {saveStatusLLM === 'success' && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                LLMFrog url saved successfully
+              </Alert>
+            )}
 
-              {saveStatusLLM === 'error' && (
-                  <Alert severity="error" sx={{ mt: 2 }}>
-                    Failed to save LLMFrog key
-                  </Alert>
-              )}
-            </>
-          )
-        }
-
+            {saveStatusLLM === 'error' && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                Failed to save LLMFrog key
+              </Alert>
+            )}
+          </>
+        )}
       </Paper>
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Translation Settings
         </Typography>
-        
+
         <FormControlLabel
           control={
             <Switch
               checked={enableRoundTrip}
-              onChange={() => dispatch(toggleRoundTrip())}
+              onChange={() => dispatch(toggleRoundTrip(!enableRoundTrip))}
             />
           }
           label={t('settings.roundTrip.label')}
         />
-        
+
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           {t('settings.roundTrip.description')}
         </Typography>
@@ -277,7 +277,7 @@ const SettingsPanel = () => {
           <>
             <FormControl fullWidth margin="normal">
               <Autocomplete
-                value={availableModels.find(model => model.id === translationModel) || null}
+                value={availableModels.find((model) => model.id === translationModel) || null}
                 onChange={(event, newValue) => {
                   if (newValue) {
                     dispatch(setTranslationModel(newValue.id));
@@ -288,21 +288,21 @@ const SettingsPanel = () => {
                 loading={loading}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        label="Model for Translation (If nothing appears first search for something in model page)"
-                        slotProps={{
-                          input: {
-                            ...params.InputProps,
-                            endAdornment: (
-                                <React.Fragment>
-                                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                  {params.InputProps.endAdornment}
-                                </React.Fragment>
-                            ),
-                          },
-                        }}
-                    />
+                  <TextField
+                    {...params}
+                    label="Model for Translation (If nothing appears first search for something in model page)"
+                    slotProps={{
+                      input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                          <React.Fragment>
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </React.Fragment>
+                        ),
+                      },
+                    }}
+                  />
                 )}
               />
             </FormControl>
@@ -317,17 +317,12 @@ const SettingsPanel = () => {
         <Typography variant="h6" gutterBottom color="error">
           Danger Zone
         </Typography>
-        
+
         <Typography variant="body2" color="text.secondary" gutterBottom>
           Clear all test cases, results, and grades from the local database.
         </Typography>
-        
-        <Button
-          variant="outlined"
-          color="error"
-          onClick={handleClearData}
-          sx={{ mt: 2 }}
-        >
+
+        <Button variant="outlined" color="error" onClick={handleClearData} sx={{ mt: 2 }}>
           Clear All Data
         </Button>
       </Paper>

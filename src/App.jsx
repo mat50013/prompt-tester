@@ -28,7 +28,14 @@ import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from './i18n';
 import { store } from './store';
 import { useSelector, useDispatch } from 'react-redux';
-import { setTheme, setLanguage, toggleRoundTrip, setActiveTab, addNotification, removeNotification } from './store/uiSlice';
+import {
+  setTheme,
+  setLanguage,
+  toggleRoundTrip,
+  setActiveTab,
+  addNotification,
+  removeNotification,
+} from './store/uiSlice';
 import { loadTestCases } from './store/testCasesSlice';
 import { loadResults } from './store/resultsSlice';
 import { db } from './services/databaseService';
@@ -43,8 +50,10 @@ const queryClient = new QueryClient();
 function AppContent() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { theme, language, activeTab, notifications, enableRoundTrip } = useSelector(state => state.ui);
-  
+  const { theme, language, activeTab, notifications, enableRoundTrip } = useSelector(
+    (state) => state.ui,
+  );
+
   const muiTheme = createTheme({
     palette: {
       mode: theme,
@@ -53,50 +62,56 @@ function AppContent() {
 
   useEffect(() => {
     const loadPersistedData = async () => {
-    try {
-      console.log('Loading persisted data...');
-      const testCases = await db.getAllTestCases();
-      const results = await db.getAllResults();
-      const grades = await db.getAllGrades();
-      
-      console.log('Loaded data:', { testCases: testCases.length, results: results.length, grades: grades.length });
-      
-      if (testCases.length > 0) {
-        dispatch(loadTestCases(testCases));
-      }
-      
-      const formattedResults = {};
-      const formattedGrades = {};
-      
-      results.forEach(result => {
-        if (!formattedResults[result.testCaseId]) {
-          formattedResults[result.testCaseId] = {};
+      try {
+        console.log('Loading persisted data...');
+        const testCases = await db.getAllTestCases();
+        const results = await db.getAllResults();
+        const grades = await db.getAllGrades();
+
+        console.log('Loaded data:', {
+          testCases: testCases.length,
+          results: results.length,
+          grades: grades.length,
+        });
+
+        if (testCases.length > 0) {
+          dispatch(loadTestCases(testCases));
         }
-        formattedResults[result.testCaseId][result.modelId] = result;
-      });
-      
-      grades.forEach(grade => {
-        if (!formattedGrades[grade.testCaseId]) {
-          formattedGrades[grade.testCaseId] = {};
+
+        const formattedResults = {};
+        const formattedGrades = {};
+
+        results.forEach((result) => {
+          if (!formattedResults[result.testCaseId]) {
+            formattedResults[result.testCaseId] = {};
+          }
+          formattedResults[result.testCaseId][result.modelId] = result;
+        });
+
+        grades.forEach((grade) => {
+          if (!formattedGrades[grade.testCaseId]) {
+            formattedGrades[grade.testCaseId] = {};
+          }
+          formattedGrades[grade.testCaseId][grade.modelId] = grade;
+        });
+
+        console.log('Formatted results:', formattedResults);
+        console.log('Formatted grades:', formattedGrades);
+
+        if (Object.keys(formattedResults).length > 0 || Object.keys(formattedGrades).length > 0) {
+          dispatch(loadResults({ results: formattedResults, grades: formattedGrades }));
         }
-        formattedGrades[grade.testCaseId][grade.modelId] = grade;
-      });
-      
-      console.log('Formatted results:', formattedResults);
-      console.log('Formatted grades:', formattedGrades);
-      
-      if (Object.keys(formattedResults).length > 0 || Object.keys(formattedGrades).length > 0) {
-        dispatch(loadResults({ results: formattedResults, grades: formattedGrades }));
+      } catch (error) {
+        console.error('Failed to load persisted data:', error);
+        dispatch(
+          addNotification({
+            type: 'error',
+            message: 'Failed to load saved data from database',
+          }),
+        );
       }
-    } catch (error) {
-      console.error('Failed to load persisted data:', error);
-      dispatch(addNotification({
-        type: 'error',
-        message: 'Failed to load saved data from database',
-      }));
-    }
-  };
-    
+    };
+
     loadPersistedData();
   }, [dispatch]);
 
@@ -146,7 +161,7 @@ function AppContent() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {t('app.title')}
             </Typography>
-            
+
             <FormControlLabel
               control={
                 <Switch
@@ -158,17 +173,22 @@ function AppContent() {
               label="Round-Trip"
               sx={{ mr: 2 }}
             />
-            
+
             <IconButton onClick={handleLanguageToggle} color="inherit" sx={{ mr: 1 }}>
               <TranslateIcon />
             </IconButton>
-            
+
             <IconButton onClick={handleThemeToggle} color="inherit">
               {theme === 'dark' ? <Brightness7 /> : <Brightness4 />}
             </IconButton>
           </Toolbar>
-          
-          <Tabs value={activeTab} onChange={handleTabChange} textColor="inherit" indicatorColor="secondary">
+
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            textColor="inherit"
+            indicatorColor="secondary"
+          >
             <Tab value="editor" label={t('navigation.editor')} />
             <Tab value="models" label={t('navigation.models')} />
             <Tab value="results" label={t('navigation.results')} />
@@ -178,9 +198,7 @@ function AppContent() {
 
         <Box sx={{ flexGrow: 1, overflow: 'hidden', bgcolor: 'background.default' }}>
           <Container maxWidth={false} sx={{ height: '100%', py: 2 }}>
-            <Paper sx={{ height: '100%', overflow: 'hidden' }}>
-              {renderTabContent()}
-            </Paper>
+            <Paper sx={{ height: '100%', overflow: 'hidden' }}>{renderTabContent()}</Paper>
           </Container>
         </Box>
 
@@ -217,4 +235,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

@@ -36,22 +36,22 @@ import ExportDialog from '../ExportDialog/ExportDialog';
 
 const ResultsDashboard = () => {
   const dispatch = useDispatch();
-  const { testCases } = useSelector(state => state.testCases);
-  const { results, executionStatus, grades } = useSelector(state => state.results);
-  const { availableModels, selectedModels } = useSelector(state => state.models);
-  const { filters } = useSelector(state => state.ui);
-  
+  const { testCases } = useSelector((state) => state.testCases);
+  const { results, executionStatus, grades } = useSelector((state) => state.results);
+  const { availableModels, selectedModels } = useSelector((state) => state.models);
+  const { filters } = useSelector((state) => state.ui);
+
   // Get all models that have been tested (regardless of current selection)
   const testedModels = useMemo(() => {
     const modelSet = new Set();
-    Object.values(results).forEach(testCaseResults => {
-      Object.keys(testCaseResults).forEach(modelId => {
+    Object.values(results).forEach((testCaseResults) => {
+      Object.keys(testCaseResults).forEach((modelId) => {
         modelSet.add(modelId);
       });
     });
     return Array.from(modelSet);
   }, [results]);
-  
+
   const [viewerOpen, setViewerOpen] = useState(false);
   const [gradingOpen, setGradingOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -60,10 +60,14 @@ const ResultsDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'success';
-      case 'failed': return 'error';
-      case 'running': return 'info';
-      default: return 'default';
+      case 'completed':
+        return 'success';
+      case 'failed':
+        return 'error';
+      case 'running':
+        return 'info';
+      default:
+        return 'default';
     }
   };
 
@@ -74,97 +78,109 @@ const ResultsDashboard = () => {
   };
 
   const handleViewResult = (testCaseId, modelId) => {
-    const testCase = testCases.find(tc => tc.id === testCaseId);
+    const testCase = testCases.find((tc) => tc.id === testCaseId);
     const result = results[testCaseId]?.[modelId];
     const grade = grades[testCaseId]?.[modelId];
-    
+
     setSelectedResult({ testCase, modelId, result, grade });
     setViewerOpen(true);
   };
 
   const handleGradeResult = (testCaseId, modelId) => {
-    const testCase = testCases.find(tc => tc.id === testCaseId);
+    const testCase = testCases.find((tc) => tc.id === testCaseId);
     const result = results[testCaseId]?.[modelId];
-    
+
     setSelectedResult({ testCase, modelId, result });
     setGradingOpen(true);
   };
 
   const handleDeleteSingleResult = async (testCaseId, modelId) => {
     const modelName = getModelName(modelId);
-    const testCase = testCases.find(tc => tc.id === testCaseId);
-    
+    const testCase = testCases.find((tc) => tc.id === testCaseId);
+
     if (window.confirm(`Delete result for "${testCase?.name}" with model "${modelName}"?`)) {
       try {
         // Delete from database
         await db.results.where('[testCaseId+modelId]').equals([testCaseId, modelId]).delete();
         await db.grades.where('[testCaseId+modelId]').equals([testCaseId, modelId]).delete();
-        
+
         // Delete from state
         dispatch(deleteResult({ testCaseId, modelId }));
-        
-        dispatch(addNotification({
-          type: 'success',
-          message: `Deleted result for ${modelName}`,
-        }));
+
+        dispatch(
+          addNotification({
+            type: 'success',
+            message: `Deleted result for ${modelName}`,
+          }),
+        );
       } catch (error) {
         console.error('Failed to delete result:', error);
-        dispatch(addNotification({
-          type: 'error',
-          message: 'Failed to delete result',
-        }));
+        dispatch(
+          addNotification({
+            type: 'error',
+            message: 'Failed to delete result',
+          }),
+        );
       }
     }
   };
 
   const handleDeleteModelResults = async (modelId) => {
     const modelName = getModelName(modelId);
-    
-    if (window.confirm(`Delete ALL results for model "${modelName}"? This will remove results from all test cases.`)) {
+
+    if (
+      window.confirm(
+        `Delete ALL results for model "${modelName}"? This will remove results from all test cases.`,
+      )
+    ) {
       try {
         // Delete from database
         await db.results.where('modelId').equals(modelId).delete();
         await db.grades.where('modelId').equals(modelId).delete();
-        
+
         // Delete from state
         dispatch(deleteAllResultsForModel({ modelId }));
-        
-        dispatch(addNotification({
-          type: 'success',
-          message: `Deleted all results for ${modelName}`,
-        }));
+
+        dispatch(
+          addNotification({
+            type: 'success',
+            message: `Deleted all results for ${modelName}`,
+          }),
+        );
       } catch (error) {
         console.error('Failed to delete model results:', error);
-        dispatch(addNotification({
-          type: 'error',
-          message: 'Failed to delete model results',
-        }));
+        dispatch(
+          addNotification({
+            type: 'error',
+            message: 'Failed to delete model results',
+          }),
+        );
       }
     }
   };
 
-  const filteredTestCases = testCases.filter(tc => {
+  const filteredTestCases = testCases.filter((tc) => {
     if (filters.statusFilter !== 'all') {
-      const hasStatus = selectedModels.some(modelId => {
+      const hasStatus = selectedModels.some((modelId) => {
         const status = executionStatus[tc.id]?.[modelId];
         return status === filters.statusFilter;
       });
       if (!hasStatus) return false;
     }
-    
+
     if (filters.scoreFilter) {
-      const hasScore = selectedModels.some(modelId => {
+      const hasScore = selectedModels.some((modelId) => {
         const grade = grades[tc.id]?.[modelId];
         return grade && grade.score >= filters.scoreFilter;
       });
       if (!hasScore) return false;
     }
-    
+
     return true;
   });
 
   const getModelName = (modelId) => {
-    const model = availableModels.find(m => m.id === modelId);
+    const model = availableModels.find((m) => m.id === modelId);
     return model?.name || modelId;
   };
 
@@ -196,12 +212,14 @@ const ResultsDashboard = () => {
           <TableHead>
             <TableRow>
               <TableCell>Test Case</TableCell>
-              {testedModels.map(modelId => (
+              {testedModels.map((modelId) => (
                 <TableCell key={modelId} align="center">
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                  <Box
+                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}
+                  >
                     {getModelName(modelId)}
-                    <IconButton 
-                      size="small" 
+                    <IconButton
+                      size="small"
                       color="error"
                       onClick={() => handleDeleteModelResults(modelId)}
                       sx={{ ml: 1 }}
@@ -215,16 +233,16 @@ const ResultsDashboard = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredTestCases.map(testCase => (
+            {filteredTestCases.map((testCase) => (
               <TableRow key={testCase.id}>
                 <TableCell>
                   <Typography variant="body2">{testCase.name}</Typography>
                 </TableCell>
-                {testedModels.map(modelId => {
+                {testedModels.map((modelId) => {
                   const result = results[testCase.id]?.[modelId];
                   const status = executionStatus[testCase.id]?.[modelId] || 'pending';
                   const grade = grades[testCase.id]?.[modelId];
-                  
+
                   return (
                     <TableCell key={modelId} align="center">
                       {status === 'running' ? (
@@ -297,22 +315,28 @@ const ResultsDashboard = () => {
         open={Boolean(filterAnchor)}
         onClose={() => setFilterAnchor(null)}
       >
-        <MenuItem onClick={() => {
-          dispatch(updateFilters({ statusFilter: 'all' }));
-          setFilterAnchor(null);
-        }}>
+        <MenuItem
+          onClick={() => {
+            dispatch(updateFilters({ statusFilter: 'all' }));
+            setFilterAnchor(null);
+          }}
+        >
           All Results
         </MenuItem>
-        <MenuItem onClick={() => {
-          dispatch(updateFilters({ statusFilter: 'completed' }));
-          setFilterAnchor(null);
-        }}>
+        <MenuItem
+          onClick={() => {
+            dispatch(updateFilters({ statusFilter: 'completed' }));
+            setFilterAnchor(null);
+          }}
+        >
           Completed Only
         </MenuItem>
-        <MenuItem onClick={() => {
-          dispatch(updateFilters({ statusFilter: 'failed' }));
-          setFilterAnchor(null);
-        }}>
+        <MenuItem
+          onClick={() => {
+            dispatch(updateFilters({ statusFilter: 'failed' }));
+            setFilterAnchor(null);
+          }}
+        >
           Failed Only
         </MenuItem>
       </Menu>
@@ -329,10 +353,7 @@ const ResultsDashboard = () => {
         result={selectedResult}
       />
 
-      <ExportDialog
-        open={exportOpen}
-        onClose={() => setExportOpen(false)}
-      />
+      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
     </Box>
   );
 };

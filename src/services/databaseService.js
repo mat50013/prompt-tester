@@ -3,14 +3,14 @@ import Dexie from 'dexie';
 class DatabaseService extends Dexie {
   constructor() {
     super('PromptTesterDB');
-    
+
     this.version(1).stores({
       testCases: 'id, name, createdAt, updatedAt',
       results: '[testCaseId+modelId], testCaseId, modelId, timestamp',
       grades: '[testCaseId+modelId], testCaseId, modelId, score',
       settings: 'key, value',
     });
-    
+
     // Version 2 to add feedback field
     this.version(2).stores({
       testCases: 'id, name, createdAt, updatedAt',
@@ -68,7 +68,7 @@ class DatabaseService extends Dexie {
   async getAllGrades() {
     const grades = await this.grades.toArray();
     console.log('DatabaseService - Loading all grades:', grades);
-    grades.forEach(grade => {
+    grades.forEach((grade) => {
       console.log(`Grade ${grade.testCaseId}/${grade.modelId} feedback:`, grade.feedback);
     });
     return grades;
@@ -87,7 +87,7 @@ class DatabaseService extends Dexie {
     const testCases = await this.getAllTestCases();
     const results = await this.getAllResults();
     const grades = await this.getAllGrades();
-    
+
     return {
       testCases,
       results,

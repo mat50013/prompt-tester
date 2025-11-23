@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { db } from './databaseService';
-import store from "../store/index.js";
+import store from '../store/index.js';
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const API_URL = import.meta.env.VITE_OPENROUTER_API_URL || 'https://openrouter.ai/api/';
@@ -10,7 +10,7 @@ class OpenRouterService {
     this.client = axios.create({
       baseURL: API_URL,
       headers: {
-        'Authorization': `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${API_KEY}`,
         'Content-Type': 'application/json',
       },
     });
@@ -69,17 +69,17 @@ class OpenRouterService {
         if (responseData.models && Array.isArray(responseData.models)) {
           const uniqueModels = new Map();
 
-          responseData.models.forEach(model => {
+          responseData.models.forEach((model) => {
             if (model.ggufFiles && Array.isArray(model.ggufFiles)) {
-              model.ggufFiles.forEach(ggufFile => {
+              model.ggufFiles.forEach((ggufFile) => {
                 const modelId = ggufFile.suggestedModelID;
 
                 if (modelId && !uniqueModels.has(modelId)) {
                   uniqueModels.set(modelId, {
                     id: modelId,
-                    name: modelId.split(':')[1] ?
-                        `${model.author}/${modelId.split('/')[1]}` :
-                        modelId,
+                    name: modelId.split(':')[1]
+                      ? `${model.author}/${modelId.split('/')[1]}`
+                      : modelId,
                     description: `${ggufFile.quantization} - ${model.author} - ${model.downloads || 0} downloads`,
                     contextLength: -1,
                     pricing: { prompt: '0', completion: '0' },
@@ -104,13 +104,18 @@ class OpenRouterService {
       } else {
         // OpenRouter API
         const response = await client.get('/v1/models');
-        const filtered = response.data.data.map(model => ({
-          id: model.id,
-          name: model.name || model.id,
-          description: model.description,
-          contextLength: model.context_length,
-          pricing: model.pricing,
-        })).filter(model => searchQuery === '' || model.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        const filtered = response.data.data
+          .map((model) => ({
+            id: model.id,
+            name: model.name || model.id,
+            description: model.description,
+            contextLength: model.context_length,
+            pricing: model.pricing,
+          }))
+          .filter(
+            (model) =>
+              searchQuery === '' || model.name.toLowerCase().includes(searchQuery.toLowerCase()),
+          );
         const sliced = filtered.slice(0, limit);
         return sliced;
       }
@@ -150,9 +155,9 @@ class OpenRouterService {
 
     try {
       const translatedPrompt = await this.translateToEnglish(
-          testCase.userPrompt,
-          testCase.sourceText,
-          translationModel
+        testCase.userPrompt,
+        testCase.sourceText,
+        translationModel,
       );
 
       const translatedTestCase = {
@@ -220,9 +225,7 @@ Feedback: [your detailed feedback]`;
 
       const response = await client.post('/v1/chat/completions', {
         model: autoGradingModel,
-        messages: [
-          { role: 'user', content: gradingPrompt }
-        ],
+        messages: [{ role: 'user', content: gradingPrompt }],
         temperature: 0.3,
       });
 
@@ -262,9 +265,7 @@ Provide only the English translation without any explanation.`;
 
       const response = await client.post('/v1/chat/completions', {
         model: modelId,
-        messages: [
-          { role: 'user', content: translationPrompt }
-        ],
+        messages: [{ role: 'user', content: translationPrompt }],
         temperature: 0.3,
       });
 
@@ -300,9 +301,7 @@ Provide only the Dutch translation without any explanation.`;
 
       const response = await client.post('/v1/chat/completions', {
         model: modelId,
-        messages: [
-          { role: 'user', content: translationPrompt }
-        ],
+        messages: [{ role: 'user', content: translationPrompt }],
         temperature: 0.3,
       });
 
@@ -315,18 +314,18 @@ Provide only the Dutch translation without any explanation.`;
 
   buildMessages(testCase) {
     const messages = [];
-    
+
     if (testCase.systemPrompt) {
       messages.push({ role: 'system', content: testCase.systemPrompt });
     }
-    
+
     let userContent = testCase.userPrompt;
     if (testCase.sourceText) {
       userContent = `${testCase.userPrompt}\n\nSource text:\n${testCase.sourceText}`;
     }
-    
+
     messages.push({ role: 'user', content: userContent });
-    
+
     return messages;
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Dialog,
   DialogTitle,
@@ -22,7 +22,7 @@ import { db } from '../../services/databaseService';
 
 const GradingDialog = ({ open, onClose, result }) => {
   const dispatch = useDispatch();
-  const { autoGradingModel } = useSelector(state => state.ui);
+  const { autoGradingModel } = useSelector((state) => state.ui);
   const [gradingMethod, setGradingMethod] = useState('manual');
   const [manualScore, setManualScore] = useState(50);
   const [comments, setComments] = useState('');
@@ -35,18 +35,20 @@ const GradingDialog = ({ open, onClose, result }) => {
   console.log(autoGradingModel);
   const handleSubmit = async () => {
     setLoading(true);
-    
+
     try {
-      const gradeData = await dispatch(gradeResult({
-        testCase,
-        result: testResult,
-        modelId,
-        gradingMethod,
-        manualScore,
-        comments,
-        autoGradingModel
-      })).unwrap();
-      
+      const gradeData = await dispatch(
+        gradeResult({
+          testCase,
+          result: testResult,
+          modelId,
+          gradingMethod,
+          manualScore,
+          comments,
+          autoGradingModel,
+        }),
+      ).unwrap();
+
       console.log('GradingDialog - Received gradeData:', gradeData);
       console.log('GradingDialog - gradeData.grade:', gradeData.grade);
       console.log('GradingDialog - gradeData.grade.feedback:', gradeData.grade.feedback);
@@ -56,29 +58,35 @@ const GradingDialog = ({ open, onClose, result }) => {
         modelId,
         ...gradeData.grade,
       };
-      
+
       console.log('Saving grade to database:', gradeToSave);
       console.log('Grade feedback field:', gradeToSave.feedback);
       await db.saveGrade(gradeToSave);
 
       // Also add to state immediately
-      dispatch(addGrade({
-        testCaseId: testCase.id,
-        modelId,
-        grade: gradeData.grade,
-      }));
+      dispatch(
+        addGrade({
+          testCaseId: testCase.id,
+          modelId,
+          grade: gradeData.grade,
+        }),
+      );
 
-      dispatch(addNotification({
-        type: 'success',
-        message: 'Result graded successfully',
-      }));
-      
+      dispatch(
+        addNotification({
+          type: 'success',
+          message: 'Result graded successfully',
+        }),
+      );
+
       onClose();
     } catch (error) {
-      dispatch(addNotification({
-        type: 'error',
-        message: `Grading failed: ${error.message}`,
-      }));
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: `Grading failed: ${error.message}`,
+        }),
+      );
     } finally {
       setLoading(false);
     }
@@ -101,15 +109,8 @@ const GradingDialog = ({ open, onClose, result }) => {
           </Box>
         </Box>
 
-        <RadioGroup
-          value={gradingMethod}
-          onChange={(e) => setGradingMethod(e.target.value)}
-        >
-          <FormControlLabel
-            value="manual"
-            control={<Radio />}
-            label="Manual Grading"
-          />
+        <RadioGroup value={gradingMethod} onChange={(e) => setGradingMethod(e.target.value)}>
+          <FormControlLabel value="manual" control={<Radio />} label="Manual Grading" />
           <FormControlLabel
             value="automatic"
             control={<Radio />}
@@ -119,9 +120,7 @@ const GradingDialog = ({ open, onClose, result }) => {
 
         {gradingMethod === 'manual' ? (
           <Box sx={{ mt: 3 }}>
-            <Typography gutterBottom>
-              Score: {manualScore}/100
-            </Typography>
+            <Typography gutterBottom>Score: {manualScore}/100</Typography>
             <Slider
               value={manualScore}
               onChange={(e, value) => setManualScore(value)}
@@ -131,7 +130,7 @@ const GradingDialog = ({ open, onClose, result }) => {
               min={0}
               max={100}
             />
-            
+
             <TextField
               fullWidth
               label="Comments"
@@ -162,11 +161,7 @@ const GradingDialog = ({ open, onClose, result }) => {
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          disabled={loading}
-        >
+        <Button onClick={handleSubmit} variant="contained" disabled={loading}>
           {loading ? <CircularProgress size={24} /> : 'Submit Grade'}
         </Button>
       </DialogActions>
