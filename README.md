@@ -19,7 +19,7 @@
 
 ## About the Project
 
-![Test Results Comparison](https://user-images.githubusercontent.com/YOUR_USERNAME/model-comparison-view.png)
+![Test Results Comparison](https://github.com/user-attachments/assets/0a4ba47d-cb0e-44e3-aac8-80c3c3961402)
 
 ### What is Prompt Tester?
 
