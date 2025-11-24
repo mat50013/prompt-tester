@@ -27,19 +27,28 @@ import {
 } from '../../store/uiSlice';
 import { db } from '../../services/databaseService';
 import i18n from '../../i18n';
+import ModelSelectorReusable from '../ModelSelector/ModelSelectorReusable.jsx';
+import {
+  fetchAvailableModelsGrading,
+  toggleModelSelectionGrading,
+} from '../../store/gradingModelSlice.js';
+import {
+  fetchAvailableModelsTranslation,
+  toggleModelSelectionTranslation,
+} from '../../store/translationModelSlice.js';
 
 const SettingsPanel = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const { theme, language, enableRoundTrip, enabledSelfHosted } = useSelector((state) => state.ui);
+  const { availableModelsGrading, loadingGrading, selectedModelsGrading, errorGrading } =
+    useSelector((state) => state.modelsGrading);
   const {
-    theme,
-    language,
-    enableRoundTrip,
-    translationModel,
-    autoGradingModel,
-    enabledSelfHosted,
-  } = useSelector((state) => state.ui);
-  const { availableModels, loading } = useSelector((state) => state.models);
+    availableModelsTranslation,
+    loadingTranslation,
+    selectedModelsTranslation,
+    errorTranslation,
+  } = useSelector((state) => state.modelsTranslation);
 
   const [llmPath, setLlmPath] = useState('');
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || '');
@@ -56,6 +65,14 @@ const SettingsPanel = () => {
 
     fetchLLMUrl();
   }, []);
+
+  useEffect(() => {
+    dispatch(setAutoGradingModel(selectedModelsGrading[0]));
+  }, [dispatch, selectedModelsGrading]);
+
+  useEffect(() => {
+    dispatch(setTranslationModel(selectedModelsTranslation[0]));
+  }, [dispatch, selectedModelsTranslation]);
 
   const handleThemeChange = (event) => {
     dispatch(setTheme(event.target.value));
@@ -98,6 +115,29 @@ const SettingsPanel = () => {
     }
   };
 
+  const handleQueryGradingModel = ({ searchTerm, limit }) => {
+    dispatch(fetchAvailableModelsGrading({ searchTerm, limit }));
+  };
+  const handleQueryTranslation = ({ searchTerm, limit }) => {
+    dispatch(fetchAvailableModelsTranslation({ searchTerm, limit }));
+  };
+
+  const handleSelectionChangeGradingModel = (newSelection) => {
+    const added = newSelection.filter((id) => !selectedModelsGrading.includes(id));
+    const removed = selectedModelsGrading.filter((id) => !newSelection.includes(id));
+
+    added.forEach((id) => dispatch(toggleModelSelectionGrading(id)));
+    removed.forEach((id) => dispatch(toggleModelSelectionGrading(id)));
+  };
+
+  const handleSelectionChangeTranslationModel = (newSelection) => {
+    const added = newSelection.filter((id) => !selectedModelsTranslation.includes(id));
+    const removed = selectedModelsTranslation.filter((id) => !newSelection.includes(id));
+
+    added.forEach((id) => dispatch(toggleModelSelectionTranslation(id)));
+    removed.forEach((id) => dispatch(toggleModelSelectionTranslation(id)));
+  };
+
   return (
     <Box sx={{ p: 3, overflowY: 'auto' }}>
       <Typography variant="h5" gutterBottom>
@@ -136,34 +176,18 @@ const SettingsPanel = () => {
         </Typography>
 
         <FormControl fullWidth margin="normal">
-          <Autocomplete
-            value={availableModels.find((model) => model.id === autoGradingModel) || null}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                dispatch(setAutoGradingModel(newValue.id));
-              }
-            }}
-            options={availableModels}
-            getOptionLabel={(option) => option.name}
-            loading={loading}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Model for AutoGrading"
-                slotProps={{
-                  input: {
-                    ...params.InputProps,
-                    endAdornment: (
-                      <React.Fragment>
-                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </React.Fragment>
-                    ),
-                  },
-                }}
-              />
-            )}
+          <ModelSelectorReusable
+            models={availableModelsGrading}
+            selectedModels={selectedModelsGrading}
+            onSelectionChange={handleSelectionChangeGradingModel}
+            onQuery={handleQueryGradingModel}
+            loading={loadingGrading}
+            error={errorGrading}
+            multiSelect={false}
+            showNoModelsAlert={false}
+            title="Select Model"
+            subtitle="Choose one model to be used for grading"
+            emptyMessage="Please select one model to be able to grade the outcomes"
           />
         </FormControl>
       </Paper>
@@ -276,34 +300,18 @@ const SettingsPanel = () => {
         {enableRoundTrip && (
           <>
             <FormControl fullWidth margin="normal">
-              <Autocomplete
-                value={availableModels.find((model) => model.id === translationModel) || null}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    dispatch(setTranslationModel(newValue.id));
-                  }
-                }}
-                options={availableModels}
-                getOptionLabel={(option) => option.name}
-                loading={loading}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Model for Translation (If nothing appears first search for something in model page)"
-                    slotProps={{
-                      input: {
-                        ...params.InputProps,
-                        endAdornment: (
-                          <React.Fragment>
-                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                            {params.InputProps.endAdornment}
-                          </React.Fragment>
-                        ),
-                      },
-                    }}
-                  />
-                )}
+              <ModelSelectorReusable
+                models={availableModelsTranslation}
+                selectedModels={selectedModelsTranslation}
+                onSelectionChange={handleSelectionChangeTranslationModel}
+                onQuery={handleQueryTranslation}
+                loading={loadingTranslation}
+                error={errorTranslation}
+                multiSelect={false}
+                showNoModelsAlert={false}
+                title="Select Model"
+                subtitle="Choose one model to be used for translation"
+                emptyMessage="Please select one model to be able to translate"
               />
             </FormControl>
             <Typography variant="body2" color="text.secondary">

@@ -27,6 +27,8 @@ import {
   ExpandLess as ExpandLessIcon,
   SelectAll as SelectAllIcon,
   Clear as ClearIcon,
+  UnfoldMore as UnfoldMoreIcon,
+  UnfoldLess as UnfoldLessIcon,
 } from '@mui/icons-material';
 
 /**
@@ -50,6 +52,7 @@ import {
  * @param {boolean} props.showPricing - Show model pricing (default: true)
  * @param {boolean} props.showContextLength - Show context length (default: true)
  * @param {string} props.emptyMessage - Message when no models selected
+ * @param {boolean} props.showNoModelsAlert - Deactivate hint saying to use the search bar
  */
 const ModelSelector = ({
   models = [],
@@ -64,7 +67,8 @@ const ModelSelector = ({
   showBulkActions = null,
   title = 'Select Models',
   subtitle = 'Choose one or more models to test your prompts against',
-  defaultLimit = 500,
+  defaultLimit = 30,
+  showNoModelsAlert = true,
   groupByProvider = true,
   showPricing = true,
   showContextLength = true,
@@ -138,6 +142,22 @@ const ModelSelector = ({
       ...prev,
       [provider]: !prev[provider],
     }));
+  };
+
+  const handleExpandAll = () => {
+    const allExpanded = Object.keys(groupedModels).reduce((acc, provider) => {
+      acc[provider] = true;
+      return acc;
+    }, {});
+    setExpandedGroups(allExpanded);
+  };
+
+  const handleCollapseAll = () => {
+    const allCollapsed = Object.keys(groupedModels).reduce((acc, provider) => {
+      acc[provider] = false;
+      return acc;
+    }, {});
+    setExpandedGroups(allCollapsed);
   };
 
   const getModelPricing = (model) => {
@@ -238,9 +258,9 @@ const ModelSelector = ({
         />
       )}
 
-      {displayBulkActions && (
-        <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
-          {multiSelect && (
+      {(displayBulkActions || (groupByProvider && Object.keys(groupedModels).length > 1)) && (
+        <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+          {multiSelect && displayBulkActions && (
             <>
               <Button
                 size="small"
@@ -260,12 +280,34 @@ const ModelSelector = ({
               </Button>
             </>
           )}
-          <Chip label={`${selectedArray.length} selected`} color="primary" size="small" />
+          {groupByProvider && Object.keys(groupedModels).length > 1 && (
+            <>
+              <Button
+                size="small"
+                startIcon={<UnfoldMoreIcon />}
+                onClick={handleExpandAll}
+                disabled={models.length === 0}
+              >
+                Expand All
+              </Button>
+              <Button
+                size="small"
+                startIcon={<UnfoldLessIcon />}
+                onClick={handleCollapseAll}
+                disabled={models.length === 0}
+              >
+                Collapse All
+              </Button>
+            </>
+          )}
+          {displayBulkActions && (
+            <Chip label={`${selectedArray.length} selected`} color="primary" size="small" />
+          )}
         </Box>
       )}
 
       <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-        {models.length === 0 ? (
+        {models.length === 0 && showNoModelsAlert ? (
           <Alert severity="info">
             No models available. {onQuery ? 'Use the query bar to search for models.' : ''}
           </Alert>

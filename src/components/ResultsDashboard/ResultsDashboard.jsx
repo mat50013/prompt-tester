@@ -240,7 +240,8 @@ const ResultsDashboard = () => {
                 </TableCell>
                 {testedModels.map((modelId) => {
                   const result = results[testCase.id]?.[modelId];
-                  const status = executionStatus[testCase.id]?.[modelId] || (result ? 'completed' :  'pending');
+                  const status =
+                    executionStatus[testCase.id]?.[modelId] || (result ? 'completed' : 'pending');
                   const grade = grades[testCase.id]?.[modelId];
 
                   return (

@@ -67,10 +67,6 @@ class DatabaseService extends Dexie {
 
   async getAllGrades() {
     const grades = await this.grades.toArray();
-    console.log('DatabaseService - Loading all grades:', grades);
-    grades.forEach((grade) => {
-      console.log(`Grade ${grade.testCaseId}/${grade.modelId} feedback:`, grade.feedback);
-    });
     return grades;
   }
 
