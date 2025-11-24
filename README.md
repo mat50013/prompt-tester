@@ -2,7 +2,8 @@
 
 **Compare, evaluate, and optimize AI model responses across multiple providers with a unified testing interface.**
 
-![Prompt Tester Dashboard](https://user-images.githubusercontent.com/YOUR_USERNAME/prompt-tester-dashboard.png)
+![Prompt Tester Dashboard](https://github.com/user-attachments/assets/9653247f-1820-4f8f-b185-973b9ea6cda4)
+
 
 ## Table of Contents
 
